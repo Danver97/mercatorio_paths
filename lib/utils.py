@@ -75,8 +75,8 @@ def _height_penalty(height: int) -> float:
         return 5
     return 20
 
-def convert(arr: Sequence[int | None]) -> Tile:
-    return Tile(
+def convert(arr: Sequence[int | None]) -> TileInfo:
+    return TileInfo(
         x=arr[0],
         y=arr[1],
         alt=arr[2],

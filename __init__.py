@@ -1,78 +1,50 @@
-from lib.types import TileDistance, TileInfo, MAX_HEIGHT, MAX_WIDTH
-from lib.utils import compute_weight
+import gzip
+import json
 from lib.map import TileMap
-import sys
+from lib.types import TileDistance, TileInfo
+from lib.utils import convert
+import os.path
 from typing import Sequence
 
-def _land(x, y) -> TileInfo:
-    return TileInfo(
-                x=x,
-                y=y,
-                alt=0,
-                fertility=60,
-                forest=None,
-                res=None,
-                res_amount=None,
-                region=None,
-                area=None,
-                type=None,
-            )
+MAP_ARCHIVE = 'map_compressed.gz'
+MAP_JSON = 'map/map_decompressed.json'
+TOWN_JSON = 'towns_s2.json'
 
-def _sea(x, y) -> TileInfo:
-    return TileInfo(
-                x=x,
-                y=y,
-                alt=0,
-                fertility=60,
-                forest=None,
-                res=None,
-                res_amount=None,
-                region=None,
-                area=None,
-                type=1,
-            )
+def decompress(infile: str, tofile: str):
+    with open(infile, 'rb') as inf, open(tofile, 'w', encoding='utf8') as tof:
+        decom_str = gzip.decompress(inf.read()).decode('utf-8')
+        tof.write(decom_str)
 
-map = [
-    _land(0, 0), _land(0, 1), _land(0, 2),
-    _land(1, 0), _sea(1, 1),  _land(1, 2),
-    _land(2, 0), _land(2, 1), _land(2, 2),
-]
+def load_json(json_path: str) -> dict | list:
+    with open(json_path) as fd:
+        json_data = json.load(fd)
+    return json_data
 
+def load_map(json_path: str) -> Sequence[TileInfo]:
+    json_data = load_json(json_path)
+    
+    return [convert(entry) for entry in json_data]
 
-def _generate_tiles(height: int, width: int) -> Sequence[TileInfo]:
-    tiles = []
-    for i in range(height):
-        for j in range(width):
-            tiles.append(TileInfo(
-                x=i,
-                y=j,
-                alt=0,
-                fertility=60,
-                forest=None,
-                res=None,
-                res_amount=None,
-                region=None,
-                area=None,
-                type=None,
-            ))
-    return tiles
+def save_distances(town_name: str, distances: Sequence[TileDistance]) -> None:
+    # Convert to compressed format
+    compressed = [[d.x, d.y, d.distance] for d in distances]
+    file_name = f'{town_name}.json'
+    with open(file_name, 'w', encoding='utf8') as fp:
+        fp.write(json.dumps(compressed))
+    print(f'Town distances file saved as {file_name}')
 
-def print_tiles(tiles: Sequence[TileInfo]) -> None:
-    for t in tiles:
-        print(f'x={t.x} y={t.y} key={t.key}')
+if not os.path.isfile(MAP_JSON):
+    decompress(MAP_ARCHIVE, MAP_JSON)
 
-tiles = map
-map = TileMap(tiles)
+towns = load_json(TOWN_JSON)
+map = TileMap(load_map(MAP_JSON))
 map.compute_costs()
-dist_arr = map.compute_distances(0, 0)
 
-def convert_to_matrix(dist: Sequence[TileDistance]) -> list[list[int | None]]:
-    matrix = [[None for _ in range(MAX_WIDTH)] for _ in range(MAX_HEIGHT)]
-    for d in dist:
-        matrix[d.x][d.y] = d.distance
-    return matrix
+for t in towns:
+    town_name: str = t['name']
+    x: int = t['location']['x']
+    y: int = t['location']['y']
 
-for row in convert_to_matrix(dist_arr):
-    print(row)
+    dist = map.compute_distances(x, y)
 
-print(convert_to_matrix(dist_arr)[1][1] == sys.float_info.max)
+    save_distances(town_name.lower(), dist)

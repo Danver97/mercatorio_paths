@@ -4,8 +4,8 @@ import heapq
 import sys
 from typing import Sequence
 
-MAX_HEIGHT = 3
-MAX_WIDTH = 3
+MAX_HEIGHT = 4096
+MAX_WIDTH = 4096
 
 def hash_coords(x: int, y: int) -> int:
     return hash((x, y))
