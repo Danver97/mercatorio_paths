@@ -17,22 +17,26 @@ class TileMap:
     def compute_costs(self) -> None:
         print('Computing costs...')
         for w in self.weights.values():
-            if w.up_key is not None:
-                w.up_weight = compute_weight(self._map[w.key], self._map[w.up_key])
-            if w.left_key is not None:
-                w.left_weight = compute_weight(self._map[w.key], self._map[w.left_key])
-            if w.right_key is not None:
-                w.right_weight = compute_weight(self._map[w.key], self._map[w.right_key])
-            if w.down_key is not None:
-                w.down_weight = compute_weight(self._map[w.key], self._map[w.down_key])
-            if w.up_left_key is not None:
-                w.up_left_weight = compute_weight(self._map[w.key], self._map[w.up_left_key], neighbors=(self._map[w.up_key], self._map[w.left_key]))
-            if w.up_right_key is not None:
-                w.up_right_weight = compute_weight(self._map[w.key], self._map[w.up_right_key], neighbors=(self._map[w.up_key], self._map[w.right_key]))
-            if w.down_left_key is not None:
-                w.down_left_weight = compute_weight(self._map[w.key], self._map[w.down_left_key], neighbors=(self._map[w.down_key], self._map[w.left_key]))
-            if w.down_right_key is not None:
-                w.down_right_weight = compute_weight(self._map[w.key], self._map[w.down_right_key], neighbors=(self._map[w.down_key], self._map[w.right_key]))
+            try:
+                if w.up_key is not None:
+                    w.up_weight = compute_weight(self._map[w.key], self._map[w.up_key])
+                if w.left_key is not None:
+                    w.left_weight = compute_weight(self._map[w.key], self._map[w.left_key])
+                if w.right_key is not None:
+                    w.right_weight = compute_weight(self._map[w.key], self._map[w.right_key])
+                if w.down_key is not None:
+                    w.down_weight = compute_weight(self._map[w.key], self._map[w.down_key])
+                if w.up_left_key is not None:
+                    w.up_left_weight = compute_weight(self._map[w.key], self._map[w.up_left_key], neighbors=(self._map[w.up_key], self._map[w.left_key]))
+                if w.up_right_key is not None:
+                    w.up_right_weight = compute_weight(self._map[w.key], self._map[w.up_right_key], neighbors=(self._map[w.up_key], self._map[w.right_key]))
+                if w.down_left_key is not None:
+                    w.down_left_weight = compute_weight(self._map[w.key], self._map[w.down_left_key], neighbors=(self._map[w.down_key], self._map[w.left_key]))
+                if w.down_right_key is not None:
+                    w.down_right_weight = compute_weight(self._map[w.key], self._map[w.down_right_key], neighbors=(self._map[w.down_key], self._map[w.right_key]))
+            except:
+                print(f'Failed when processing weight {w.x} {w.y}')
+                raise
 
     def dijkstra(self, x: int, y: int) -> dict[int, float]:
         print('Running djkstra...')
