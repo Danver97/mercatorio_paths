@@ -15,6 +15,7 @@ class TileMap:
         }
 
     def compute_costs(self) -> None:
+        print('Computing costs...')
         for w in self.weights.values():
             if w.up_key is not None:
                 w.up_weight = compute_weight(self._map[w.key], self._map[w.up_key])
@@ -34,6 +35,7 @@ class TileMap:
                 w.down_right_weight = compute_weight(self._map[w.key], self._map[w.down_right_key], neighbors=(self._map[w.down_key], self._map[w.right_key]))
 
     def dijkstra(self, x: int, y: int) -> dict[int, float]:
+        print('Running djkstra...')
         pq = []
         dist: dict[int, float] = {}
 

@@ -21,6 +21,7 @@ def load_json(json_path: str) -> dict | list:
     return json_data
 
 def load_map(json_path: str) -> Sequence[TileInfo]:
+    print('Loading map...')
     json_data = load_json(json_path)
     
     return [convert(entry) for entry in json_data]
@@ -28,6 +29,7 @@ def load_map(json_path: str) -> Sequence[TileInfo]:
 def save_distances(town_name: str, distances: Sequence[TileDistance]) -> None:
     # Convert to compressed format
     compressed = [[d.x, d.y, d.distance] for d in distances]
+
     file_name = f'{town_name}.json'
     with open(file_name, 'w', encoding='utf8') as fp:
         fp.write(json.dumps(compressed))
@@ -42,6 +44,7 @@ map.compute_costs()
 
 for t in towns:
     town_name: str = t['name']
+    print(f'Town: {town_name}')
     x: int = t['location']['x']
     y: int = t['location']['y']
 
