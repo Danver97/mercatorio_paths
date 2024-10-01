@@ -14,6 +14,11 @@ Several community created websites (like [this one](https://king-br.github.io/Me
 
 This library is intended to provide an offline computation of distances from each city (one at a time). Given a transportation vehicle and its range, it is then possible to show only the tiles within travel range.
 
+To launch the script just run:
+```sh
+python3 __init__.py
+```
+
 ## Architecture
 
 Dijkstra's algorithm finds the shortest path from a given source node to every other node of a graph.
