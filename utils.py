@@ -48,9 +48,8 @@ def load_map(map_dir: str) -> Sequence[TileInfo]:
         json_data = load_json(_compressed_map_json_path(map_dir))
         return [convert(entry) for entry in json_data]
     else:
-        for f in MULTI_FILE_MAP:
-            assert(os.path.isfile(_map_json_path(map_dir, f)))
+        for file in MULTI_FILE_MAP:
+            assert(os.path.isfile(_map_json_path(map_dir, file)))
         return [
-            convert(entry) for entry in load_json(f)
-            for f in MULTI_FILE_MAP
+            convert(entry) for f in MULTI_FILE_MAP for entry in load_json(_map_json_path(map_dir, f))
         ]
