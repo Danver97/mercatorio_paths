@@ -6,7 +6,7 @@ from typing import Sequence
 from utils import decompress, load_json, load_map
 
 # MAP_ARCHIVE = 'map_compressed.gz' # Currently missing some tiles for some reason.
-MAP_ARCHIVE = 'map_uncompressed.zip'
+MAP_ARCHIVE = 'compressed.zip'
 MAP_DIR = 'map'
 TOWN_JSON = 'towns_s2.json'
 

@@ -24,9 +24,11 @@ def _compressed_map_json_path(map_dir: str) -> str:
 
 def decompress(map_archive: str, map_output_dir: str) -> None:
     if 'gz' in map_archive:
-        _decompress_zip(map_archive, map_output_dir)
-    else:
         _decompress_gz(map_archive, _compressed_map_json_path(map_output_dir))
+    else:
+        _decompress_zip(map_archive, map_output_dir)
+        if len(os.listdir(map_output_dir)) == 1:
+            os.rename(_map_json_path(map_output_dir, os.listdir(map_output_dir)[0]), _compressed_map_json_path(map_output_dir))
 
 def _decompress_zip(infile: str, todir: str):
     with zipfile.ZipFile(infile, 'r') as zip_ref:
@@ -50,6 +52,9 @@ def load_map(map_dir: str) -> Sequence[TileInfo]:
     else:
         for file in MULTI_FILE_MAP:
             assert(os.path.isfile(_map_json_path(map_dir, file)))
+        def _to_json_path(f: str) -> str:
+            print(f)
+            return _map_json_path(map_dir, f)
         return [
-            convert(entry) for f in MULTI_FILE_MAP for entry in load_json(_map_json_path(map_dir, f))
+            convert(entry) for f in MULTI_FILE_MAP for entry in load_json(_to_json_path(f))
         ]

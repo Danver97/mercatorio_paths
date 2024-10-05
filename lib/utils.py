@@ -96,14 +96,17 @@ def _convert_from_compressed(arr: Sequence[int | None]) -> TileInfo:
 
 def _convert_from_uncompressed(entry: dict) -> TileInfo:
     return TileInfo(
-        x=entry['x'], # ok
-        y=entry['y'], # ok
-        alt=entry['data'].get('alt'), # ok
+        x=entry['x'],
+        y=entry['y'],
+        alt=entry['data'].get('alt'),
         fertility=entry['data'].get('fertility'),
-        forest=entry['data'].get('forest'), # ok
+        forest=entry['data'].get('forest'),
         res=entry['data'].get('res'),
         res_amount=entry['data'].get('res_amount'),
-        region=entry['data'].get('region'), # ok
-        area=entry['data'].get('area'), # ok
+        region=entry['data'].get('region'),
+        area=entry['data'].get('area'),
         type=entry['data'].get('type'),
     )
+
+# jq 'map([.x,.y,.data.alt,.data.fertility,.data.forest,.data.res,.data.res_amount,.data.region,.data.area,.data.type])'
+# jq -s '.[0] + .[1] + .[2] + .[3]'
