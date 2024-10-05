@@ -75,7 +75,12 @@ def _height_penalty(height: int) -> float:
         return 5
     return 20
 
-def convert(arr: Sequence[int | None]) -> TileInfo:
+def convert(entry: dict | Sequence[int | None]) -> TileInfo:
+    if isinstance(entry, dict):
+        return _convert_from_uncompressed(entry)
+    return _convert_from_compressed(entry)
+
+def _convert_from_compressed(arr: Sequence[int | None]) -> TileInfo:
     return TileInfo(
         x=arr[0],
         y=arr[1],
@@ -87,4 +92,18 @@ def convert(arr: Sequence[int | None]) -> TileInfo:
         region=arr[7],
         area=arr[8],
         type=arr[9],
+    )
+
+def _convert_from_uncompressed(entry: dict) -> TileInfo:
+    return TileInfo(
+        x=entry['x'], # ok
+        y=entry['y'], # ok
+        alt=entry['data'].get('alt'), # ok
+        fertility=entry['data'].get('fertility'),
+        forest=entry['data'].get('forest'), # ok
+        res=entry['data'].get('res'),
+        res_amount=entry['data'].get('res_amount'),
+        region=entry['data'].get('region'), # ok
+        area=entry['data'].get('area'), # ok
+        type=entry['data'].get('type'),
     )

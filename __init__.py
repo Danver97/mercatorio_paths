@@ -1,30 +1,14 @@
-import gzip
 import json
 from lib.map import TileMap
-from lib.types import TileDistance, TileInfo
-from lib.utils import convert
+from lib.types import TileDistance
 import os.path
 from typing import Sequence
+from utils import decompress, load_json, load_map
 
-MAP_ARCHIVE = 'map_compressed.gz'
-MAP_JSON = 'map/map_decompressed.json'
+# MAP_ARCHIVE = 'map_compressed.gz' # Currently missing some tiles for some reason.
+MAP_ARCHIVE = 'map_uncompressed.zip'
+MAP_DIR = 'map'
 TOWN_JSON = 'towns_s2.json'
-
-def decompress(infile: str, tofile: str):
-    with open(infile, 'rb') as inf, open(tofile, 'w', encoding='utf8') as tof:
-        decom_str = gzip.decompress(inf.read()).decode('utf-8')
-        tof.write(decom_str)
-
-def load_json(json_path: str) -> dict | list:
-    with open(json_path) as fd:
-        json_data = json.load(fd)
-    return json_data
-
-def load_map(json_path: str) -> Sequence[TileInfo]:
-    print('Loading map...')
-    json_data = load_json(json_path)
-    
-    return [convert(entry) for entry in json_data]
 
 def save_distances(town_name: str, distances: Sequence[TileDistance]) -> None:
     # Convert to compressed format
@@ -35,11 +19,12 @@ def save_distances(town_name: str, distances: Sequence[TileDistance]) -> None:
         fp.write(json.dumps(compressed))
     print(f'Town distances file saved as {file_name}')
 
-if not os.path.isfile(MAP_JSON):
-    decompress(MAP_ARCHIVE, MAP_JSON)
+# If MAP_DIR doesn't exists yet or is still empty
+if not os.path.isdir(MAP_DIR) or not os.listdir(MAP_DIR):
+    decompress(MAP_ARCHIVE, MAP_DIR)
 
 towns = load_json(TOWN_JSON)
-map = TileMap(load_map(MAP_JSON))
+map = TileMap(load_map(MAP_DIR))
 map.compute_costs()
 
 for t in towns:
