@@ -58,15 +58,14 @@ class TileMap:
 
             # For each neighbor of u
             for n in self._map[u].adjacency_keys:
-                distance_u_n = None
-                # If we are starting from a town, we can go whenever we want (i.e. land -> sea is allowed as we are boarding)
-                # In such a case, we compute the initial weight on the fly as in the case of a land -> sea move, we treated the graph as disconnected.
-                if u == source_key and is_crossable_if_source_is_town(self._map[u], self._map[n]):
-                    distance_u_n = compute_weight(self._map[u], self._map[n], is_source_town=True)
-                else:
-                    distance_u_n = self.weights[u].distance(n)
+                distance_u_n = self.weights[u].distance(n)
+                # If distance_u_n is None, u and n are not crossable, mostly because is a land -> sea move.
+                # But if we are starting from a town, we can go whenever we want (i.e. land -> sea is allowed as we are boarding).
+                # In such a case, the initial weight is 0 as we are starting from the sea tile with the boat.
+                if distance_u_n is None and u == source_key and is_crossable_if_source_is_town(self._map[u], self._map[n]):
+                    distance_u_n = 0
 
-                # distance_u_n is None, u and n are not connected in the graph (basically _is_crossable returned False)
+                # distance_u_n is still None, u and n are not connected in the graph
                 if distance_u_n is None:
                     continue
 
