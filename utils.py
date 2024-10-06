@@ -1,10 +1,11 @@
 import gzip
 import json
 import zipfile
-from lib.types import TileInfo
-from lib.utils import convert
+from lib.types import FerryInfo, TileInfo
+from lib.utils import convert, convert_ferry
 import os.path
 from typing import Sequence
+from urllib.request import urlretrieve
 
 # How compressed map is unachived
 SINGLE_FILE_MAP_FILE = 'map_data.json'
@@ -15,6 +16,7 @@ MULTI_FILE_MAP = [
     'plots_2.json',
     'plots_3.json',
 ]
+FERRIES_DATA = 'https://raw.githubusercontent.com/King-BR/Mercatorio-Interactive-Map/refs/heads/master/assets/s2/ferriesData.json'
 
 def _map_json_path(map_dir: str, file_path: str) -> str:
     return f'{map_dir}/{file_path}'
@@ -58,3 +60,13 @@ def load_map(map_dir: str) -> Sequence[TileInfo]:
         return [
             convert(entry) for f in MULTI_FILE_MAP for entry in load_json(_to_json_path(f))
         ]
+
+def retrieve_or_update_ferries(output_file_name: str) -> None:
+    if os.path.isfile(output_file_name):
+        os.remove(output_file_name)
+    
+    urlretrieve(FERRIES_DATA, output_file_name)
+
+def load_ferries(json_path: str) -> Sequence[FerryInfo]:
+    data = load_json(json_path)
+    return [convert_ferry(entry) for entry in data]

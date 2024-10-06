@@ -1,5 +1,5 @@
 from __future__ import annotations
-from lib.types import Tile, TileInfo
+from lib.types import FerryInfo, TileInfo, hash_coords
 from typing import Sequence
 
 def compute_weight(src: TileInfo, dest: TileInfo, neighbors: Sequence[TileInfo] = (), is_source_town: bool = False) -> float | None:
@@ -106,6 +106,13 @@ def _convert_from_uncompressed(entry: dict) -> TileInfo:
         region=entry['data'].get('region'),
         area=entry['data'].get('area'),
         type=entry['data'].get('type'),
+    )
+
+def convert_ferry(entry: dict) -> FerryInfo:
+    return FerryInfo(
+        x=entry['location']['x'],
+        y=entry['location']['y'],
+        ferries={hash_coords(l['location']['x'], l['location']['y']) for l in entry['landings']} if entry['landings'] is not None else {}
     )
 
 # jq 'map([.x,.y,.data.alt,.data.fertility,.data.forest,.data.res,.data.res_amount,.data.region,.data.area,.data.type])'

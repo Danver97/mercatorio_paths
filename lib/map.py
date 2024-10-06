@@ -1,22 +1,25 @@
 from __future__ import annotations
 import heapq
-from lib.types import TileDistance, TileInfo, TileWeight, hash_coords
+from lib.types import FerryInfo, TileDistance, TileInfo, TileWeight, hash_coords, MAX_HEIGHT
 from lib.utils import compute_weight, is_crossable_if_source_is_town
 import sys
 from typing import Sequence
 
 class TileMap:
-    def __init__(self, tiles: Sequence[TileInfo]):
+    def __init__(self, tiles: Sequence[TileInfo], ferries: Sequence[FerryInfo] = ()):
         self._map = {
             t.key: t for t in tiles
         }
+        ferries_dict: dict[int, set[int]] = {
+            f.key: f.ferries for f in ferries
+        }
         self.weights = {
-            t.key: TileWeight(x=t.x, y=t.y) for t in tiles
+            t.key: TileWeight(x=t.x, y=t.y, ferries=ferries_dict.get(hash_coords(t.x, t.y), {})) for t in tiles
         }
 
     def compute_costs(self) -> None:
         print('Computing costs...')
-        for w in self.weights.values():
+        for i, w in enumerate(self.weights.values()):
             try:
                 if w.up_key is not None:
                     w.up_weight = compute_weight(self._map[w.key], self._map[w.up_key])
@@ -37,6 +40,8 @@ class TileMap:
             except:
                 print(f'Failed when processing weight {w.x} {w.y}')
                 raise
+            if i % MAX_HEIGHT == 0:
+                print(f'Processed {i // MAX_HEIGHT} rows of the map')
 
     def dijkstra(self, x: int, y: int) -> dict[int, float]:
         print('Running djkstra...')

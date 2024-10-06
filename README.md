@@ -51,8 +51,3 @@ Indeed there are a series of constraints which must be **all** satisfied for a m
 - If two **sea** tiles are diagonally connected, a move is always allowed only if another **sea** tile is adjacent to **both**.
 
 In our library if a move between two tiles is not allowed (or does not exist like at the boundaries of the map), its weight is `None`.
-
-## Limitations
-
-- Ferries are not yet supported. Mainly due to lack of knowledge of how they work yet.
-- Currently no map areas are taken into account for the map traversability. It is not yet clear how areas affect it in the game.

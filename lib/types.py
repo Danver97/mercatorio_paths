@@ -108,7 +108,11 @@ class TileInfo(Tile):
     def is_forest(self) -> bool:
         return self.forest is not None
 
-class TileWeight(Tile):
+@dataclass(frozen=True)
+class FerryInfo(Tile):
+    ferries: set[int]
+
+class TileWeight(FerryInfo):
     up_weight: int | None
     left_weight: int | None
     right_weight: int | None
@@ -118,7 +122,13 @@ class TileWeight(Tile):
     down_left_weight: int | None
     down_right_weight: int | None
 
+    @property
+    def adjacency_keys(self) -> Sequence[int]:
+        return super().adjacency_keys + self.ferries
+
     def distance(self, key: int) -> int | None:
+        if key in self.ferries:
+            return 0
         if key == self.up_key:
             return self.up_weight
         if key == self.left_key:
