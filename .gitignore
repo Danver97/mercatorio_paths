@@ -3,5 +3,5 @@ convert.js
 __pycache__
 map/
 areas/
-prova.py
+prova*.py
 ferries.json
