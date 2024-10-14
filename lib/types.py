@@ -12,6 +12,10 @@ def hash_coords(x: int, y: int) -> int:
 
 @dataclass(frozen=True)
 class Tile:
+    __slots__ = (
+        'x',
+        'y',
+    )
     x: int
     y: int
     
@@ -91,6 +95,16 @@ class Tile:
 
 @dataclass(frozen=True)
 class TileInfo(Tile):
+    __slots__ = (
+        'alt',
+        'fertility',
+        'forest',
+        'res',
+        'res_amount',
+        'region',
+        'area',
+        'type',
+    )
     alt: int # altitude (type is integer)
     fertility: int # tile fertility, 0 is arid, less than 40 is grazing, less than 80 is fertile, 80 or higher is clay (type is integer)
     forest: int | None # if the property exists, the tile has a forest (type is a integer)
@@ -110,9 +124,22 @@ class TileInfo(Tile):
 
 @dataclass(frozen=True)
 class FerryInfo(Tile):
+    __slots__ = (
+        'ferries',
+    )
     ferries: set[int]
 
 class TileWeight(FerryInfo):
+    __slots__ = (
+        'up_weight',
+        'left_weight',
+        'right_weight',
+        'down_weight',
+        'up_left_weight',
+        'up_right_weight',
+        'down_left_weight',
+        'down_right_weight',
+    )
     up_weight: int | None
     left_weight: int | None
     right_weight: int | None
@@ -149,4 +176,7 @@ class TileWeight(FerryInfo):
 
 @dataclass(frozen=True)
 class TileDistance(Tile):
+    __slots__ = (
+        'distance',
+    )
     distance: int | None

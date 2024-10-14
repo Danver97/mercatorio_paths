@@ -11,12 +11,16 @@ MAP_ARCHIVE = 'compressed.zip'
 MAP_DIR = 'map'
 TOWN_JSON = 'towns_s2.json'
 FERRIES_JSON = 'ferries.json'
+OUTPUT_DIR = 'distances'
 
 def save_distances(town_name: str, distances: Sequence[TileDistance]) -> None:
     # Convert to compressed format
     compressed = [[d.x, d.y, d.distance] for d in distances]
 
-    file_name = f'{town_name}.json'
+    if not os.path.isdir(OUTPUT_DIR):
+        os.mkdir(OUTPUT_DIR)
+
+    file_name = f'{OUTPUT_DIR}/{town_name}.json'
     with open(file_name, 'w', encoding='utf8') as fp:
         fp.write(json.dumps(compressed))
     print(f'Town distances file saved as {file_name}')
