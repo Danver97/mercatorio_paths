@@ -1,5 +1,5 @@
 from __future__ import annotations
-from lib.types import FerryInfo, TileInfo, hash_coords
+from lib.types import FerryInfo, TileInfo, TileWeight, hash_coords
 from typing import Sequence
 
 def compute_weight(src: TileInfo, dest: TileInfo, neighbors: Sequence[TileInfo] = (), is_source_town: bool = False) -> float | None:
@@ -75,13 +75,13 @@ def _height_penalty(height: int) -> float:
         return 5
     return 20
 
-def convert(entry: dict | Sequence[int | None]) -> TileInfo:
+def convert(entry: dict | Sequence[int | None]) -> TileWeight:
     if isinstance(entry, dict):
         return _convert_from_uncompressed(entry)
     return _convert_from_compressed(entry)
 
-def _convert_from_compressed(arr: Sequence[int | None]) -> TileInfo:
-    return TileInfo(
+def _convert_from_compressed(arr: Sequence[int | None]) -> TileWeight:
+    return TileWeight(
         x=arr[0],
         y=arr[1],
         alt=arr[2],
@@ -94,8 +94,8 @@ def _convert_from_compressed(arr: Sequence[int | None]) -> TileInfo:
         type=arr[9],
     )
 
-def _convert_from_uncompressed(entry: dict) -> TileInfo:
-    return TileInfo(
+def _convert_from_uncompressed(entry: dict) -> TileWeight:
+    return TileWeight(
         x=entry['x'],
         y=entry['y'],
         alt=entry['data'].get('alt'),

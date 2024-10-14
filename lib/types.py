@@ -129,8 +129,9 @@ class FerryInfo(Tile):
     )
     ferries: set[int]
 
-class TileWeight(FerryInfo):
+class TileWeight(TileInfo):
     __slots__ = (
+        'ferries',
         'up_weight',
         'left_weight',
         'right_weight',
@@ -140,6 +141,7 @@ class TileWeight(FerryInfo):
         'down_left_weight',
         'down_right_weight',
     )
+    ferries: set[int]
     up_weight: int | None
     left_weight: int | None
     right_weight: int | None

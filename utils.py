@@ -1,7 +1,7 @@
 import gzip
 import json
 import zipfile
-from lib.types import FerryInfo, TileInfo
+from lib.types import FerryInfo, TileWeight
 from lib.utils import convert, convert_ferry
 import os.path
 from typing import Sequence
@@ -46,7 +46,7 @@ def load_json(json_path: str) -> dict | list:
         json_data = json.load(fd)
     return json_data
 
-def load_map(map_dir: str) -> Sequence[TileInfo]:
+def load_map(map_dir: str) -> Sequence[TileWeight]:
     print('Loading map...')
     if os.path.isfile(_compressed_map_json_path(map_dir)):
         json_data = load_json(_compressed_map_json_path(map_dir))

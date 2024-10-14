@@ -1,25 +1,23 @@
 from __future__ import annotations
 import heapq
-from lib.types import FerryInfo, TileDistance, TileInfo, TileWeight, hash_coords, MAX_HEIGHT
+from lib.types import FerryInfo, TileDistance, TileWeight, hash_coords, MAX_HEIGHT
 from lib.utils import compute_weight, is_crossable_if_source_is_town
+from pympler.asizeof import asizeof
 import sys
 from typing import Sequence
 
 class TileMap:
-    def __init__(self, tiles: Sequence[TileInfo], ferries: Sequence[FerryInfo] = ()):
+    def __init__(self, tiles: Sequence[TileWeight], ferries: Sequence[FerryInfo] = ()):
         self._map = {
             t.key: t for t in tiles
         }
-        ferries_dict: dict[int, set[int]] = {
-            f.key: f.ferries for f in ferries
-        }
-        self.weights = {
-            t.key: TileWeight(x=t.x, y=t.y, ferries=ferries_dict.get(hash_coords(t.x, t.y), {})) for t in tiles
-        }
+        for f in ferries:
+            self._map[f.key].ferries = f.ferries
+        print(f'Map loaded. Total size in RAM: {asizeof(self._map)/1024/1024/1024} GB')
 
     def compute_costs(self) -> None:
         print('Computing costs...')
-        for i, w in enumerate(self.weights.values()):
+        for i, w in enumerate(self._map.values()):
             try:
                 if w.up_key is not None:
                     w.up_weight = compute_weight(self._map[w.key], self._map[w.up_key])
@@ -42,6 +40,7 @@ class TileMap:
                 raise
             if i % MAX_HEIGHT == 0:
                 print(f'Processed {i // MAX_HEIGHT} rows of the map')
+        print(f'Costs computed. Total size in RAM: {asizeof(self._map)/1024/1024/1024} GB')
 
     def dijkstra(self, x: int, y: int) -> dict[int, float]:
         print('Running djkstra...')
@@ -63,7 +62,7 @@ class TileMap:
 
             # For each neighbor of u
             for n in self._map[u].adjacency_keys:
-                distance_u_n = self.weights[u].distance(n)
+                distance_u_n = self._map[u].distance(n)
                 # If distance_u_n is None, u and n are not crossable, mostly because is a land -> sea move.
                 # But if we are starting from a town, we can go whenever we want (i.e. land -> sea is allowed as we are boarding).
                 # In such a case, the initial weight is 0 as we are starting from the sea tile with the boat.
@@ -82,4 +81,8 @@ class TileMap:
     
     def compute_distances(self, x: int, y: int) -> Sequence[TileDistance]:
         dist = self.dijkstra(x, y)
-        return [TileDistance(t.x, t.y, dist[t.key] if dist[t.key] != sys.float_info.max else None) for t in self._map.values()]
+        return [
+            TileDistance(t.x, t.y, dist[t.key] if dist[t.key] != sys.float_info.max else None)
+                for t in self._map.values()
+                if dist[t.key] != sys.float_info.max
+            ]
