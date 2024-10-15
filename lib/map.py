@@ -1,8 +1,7 @@
 from __future__ import annotations
 import heapq
 from lib.types import FerryInfo, TileDistance, TileWeight, hash_coords, MAX_HEIGHT
-from lib.utils import compute_weight, is_crossable_if_source_is_town
-from pympler.asizeof import asizeof
+from lib.utils import compute_weight, is_crossable_if_source_is_town, size_logger
 import sys
 from typing import Sequence
 
@@ -13,7 +12,8 @@ class TileMap:
         }
         for f in ferries:
             self._map[f.key].ferries = f.ferries
-        print(f'Map loaded. Total size in RAM: {asizeof(self._map)/1024/1024/1024} GB')
+        size_logger('Map loaded. Total size in RAM: {size} GB', self._map, unit='GB')
+        # print(f'Map loaded. Total size in RAM: {asizeof(self._map)/1024/1024/1024} GB')
 
     def compute_costs(self) -> None:
         print('Computing costs...')
@@ -40,7 +40,8 @@ class TileMap:
                 raise
             if i % MAX_HEIGHT == 0:
                 print(f'Processed {i // MAX_HEIGHT} rows of the map')
-        print(f'Costs computed. Total size in RAM: {asizeof(self._map)/1024/1024/1024} GB')
+        size_logger('Costs computed. Total size in RAM: {size} GB', self._map, unit='GB')
+        # print(f'Costs computed. Total size in RAM: {asizeof(self._map)/1024/1024/1024} GB')
 
     def dijkstra(self, x: int, y: int) -> dict[int, float]:
         print('Running djkstra...')

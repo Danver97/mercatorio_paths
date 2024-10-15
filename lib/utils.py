@@ -115,5 +115,28 @@ def convert_ferry(entry: dict) -> FerryInfo:
         ferries={hash_coords(l['location']['x'], l['location']['y']) for l in entry['landings']} if entry['landings'] is not None else {}
     )
 
+def size_logger(message: str, data: object, unit: str = 'B') -> None:
+    """
+    It logs the size of data in the message, in the position where the placeholder size has been positioned.
+    It also accepts a unit keyword arg, where the allowed values are 'B', 'KB', 'MB', 'GB' used for proper formatting.
+
+    To compute size, it uses the external dependency pympler. If the module is not installed, it will skip logging.
+    """
+    try:
+        from pympler.asizeof import asizeof
+        size = asizeof(data)
+        if unit.upper() == 'KB':
+            size = size / 1024
+        elif unit.upper() == 'MB':
+            size = size / 1024 / 1024
+        elif unit.upper() == 'GB':
+            size = size / 1024 / 1024 / 1024
+        print(message.format(size=size))
+    except ModuleNotFoundError:
+        print("""
+Warning: 'pympler' module is not installed. If you want to have some debugging information about memory foot prints, please run:
+pip install pympler
+            """)
+
 # jq 'map([.x,.y,.data.alt,.data.fertility,.data.forest,.data.res,.data.res_amount,.data.region,.data.area,.data.type])'
 # jq -s '.[0] + .[1] + .[2] + .[3]'
