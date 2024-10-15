@@ -117,8 +117,8 @@ def convert_ferry(entry: dict) -> FerryInfo:
 
 def size_logger(message: str, data: object, unit: str = 'B') -> None:
     """
-    It logs the size of data in the message, in the position where the placeholder size has been positioned.
-    It also accepts a unit keyword arg, where the allowed values are 'B', 'KB', 'MB', 'GB' used for proper formatting.
+    It logs the size of 'data' in the 'message', in the position where the placeholder 'size' has been positioned.
+    It also accepts a 'unit' keyword arg, where the allowed values are 'B', 'KB', 'MB', 'GB' used for proper formatting.
 
     To compute size, it uses the external dependency pympler. If the module is not installed, it will skip logging.
     """
