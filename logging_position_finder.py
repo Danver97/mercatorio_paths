@@ -1,6 +1,6 @@
 from lib.types import TileDistance, TileWeight
 import os.path
-from typing import Sequence, Iterable
+from typing import Sequence, Iterable, Tuple
 from utils import decompress, load_map
 
 
@@ -24,28 +24,59 @@ from utils import decompress, load_map
 #          o         |         o
 # -6         o o     v     o o
 # -7             o o o o o
-def is_in_range(target: tuple[int, int], t: TileWeight) -> bool:
-    target_x, target_y = target
 
-    ranges = [
-        [(target_x + 7, target_y - 2), (target_x + 7, target_y + 2)],
-        [(target_x + 6, target_y - 4), (target_x + 6, target_y + 4)],
-        [(target_x + 5, target_y - 5), (target_x + 5, target_y + 5)],
-        [(target_x + 4, target_y - 6), (target_x + 4, target_y + 6)],
-        [(target_x + 3, target_y - 6), (target_x + 3, target_y + 6)],
-        [(target_x + 2, target_y - 7), (target_x + 2, target_y + 7)],
-        [(target_x + 1, target_y - 7), (target_x + 1, target_y + 7)],
+def circle_boundaries(radius) -> Sequence[Tuple[int, int, int]]:
+    # Radius needs to be an integer for this grid-based approach
+    radius = radius - 1 # excluding the center
+    boundaries = []
+    
+    # Determine the size of the grid
+    for x in range(-radius, radius + 1):
+        line_boundaries = []
+        for y in range(-radius, radius + 1):
+            # Equation of a circle: x^2 + y^2 = r^2
+            distance = (x**2 + y**2)**0.5
+            # if radius - 0.5 <= distance <= radius:
+            if radius - 0.5 <= distance <= radius + 0.5:
+                line_boundaries.append(y)
+                # print("#", end="")
+            else:
+                # print(" ", end="")
+                pass
+        boundaries.append((x, min(line_boundaries), max(line_boundaries)))
+        # print()
+    return boundaries
 
-        [(target_x + 0, target_y - 7), (target_x + 0, target_y + 7)],
+def compute_ranges(coords: Tuple[int, int], radius: int) -> Sequence[Tuple[Tuple[int, int], Tuple[int, int]]]:
+    x, y = coords
+    boundaries = circle_boundaries(radius)
+    ranges = []
+    for b in boundaries:
+        (offset_x, offset_y_left, offset_y_right) = b
+        ranges.append(((x + offset_x, y + offset_y_left), (x + offset_x, y + offset_y_right)))
+    return ranges
 
-        [(target_x - 1, target_y - 7), (target_x - 1, target_y + 7)],
-        [(target_x - 2, target_y - 7), (target_x - 2, target_y + 7)],
-        [(target_x - 3, target_y - 6), (target_x - 3, target_y + 6)],
-        [(target_x - 4, target_y - 6), (target_x - 4, target_y + 6)],
-        [(target_x - 5, target_y - 5), (target_x - 5, target_y + 5)],
-        [(target_x - 6, target_y - 4), (target_x - 6, target_y + 4)],
-        [(target_x - 7, target_y - 2), (target_x - 7, target_y + 2)],
-    ]
+def is_in_range(target: tuple[int, int], t: TileWeight, radius: int = 8) -> bool:
+    # ranges = [
+    #     [(target_x + 7, target_y - 2), (target_x + 7, target_y + 2)],
+    #     [(target_x + 6, target_y - 4), (target_x + 6, target_y + 4)],
+    #     [(target_x + 5, target_y - 5), (target_x + 5, target_y + 5)],
+    #     [(target_x + 4, target_y - 6), (target_x + 4, target_y + 6)],
+    #     [(target_x + 3, target_y - 6), (target_x + 3, target_y + 6)],
+    #     [(target_x + 2, target_y - 7), (target_x + 2, target_y + 7)],
+    #     [(target_x + 1, target_y - 7), (target_x + 1, target_y + 7)],
+
+    #     [(target_x + 0, target_y - 7), (target_x + 0, target_y + 7)],
+
+    #     [(target_x - 1, target_y - 7), (target_x - 1, target_y + 7)],
+    #     [(target_x - 2, target_y - 7), (target_x - 2, target_y + 7)],
+    #     [(target_x - 3, target_y - 6), (target_x - 3, target_y + 6)],
+    #     [(target_x - 4, target_y - 6), (target_x - 4, target_y + 6)],
+    #     [(target_x - 5, target_y - 5), (target_x - 5, target_y + 5)],
+    #     [(target_x - 6, target_y - 4), (target_x - 6, target_y + 4)],
+    #     [(target_x - 7, target_y - 2), (target_x - 7, target_y + 2)],
+    # ]
+    ranges = compute_ranges(target, radius)
 
     # print(target)
     # print((t.x, t.y))
@@ -70,13 +101,17 @@ MAP_DIR = 'map'
 if not os.path.isdir(MAP_DIR) or not os.listdir(MAP_DIR):
     decompress(MAP_ARCHIVE, MAP_DIR)
 
-c_x, c_y = (2108, 3135)
-size = 40
+c_x, c_y = (2090, 3150)
+size = 46
 min_x, max_x, min_y, max_y = (c_x - size / 2, c_x + size / 2, c_y - size / 2, c_y + size / 2)
 
 tiles_map = load_map(MAP_DIR)
 
-def _print(target: tuple[int, int], tiles: Sequence[Sequence[TileWeight]]):
+existing_camp_1 = (2105, 3131)
+existing_camp_2 = (2104, 3142)
+# existing_camp_3 = (2093, 3152) Soon to be
+
+def _print(target: tuple[int, int], tiles: Sequence[Sequence[TileWeight]], outpost: tuple[int, int] = None):
     target_x, target_y = target
     # tiles.sort(key=lambda t_row: -t_row[0].x)
     print(f'target: {target_x}, {target_y}')
@@ -92,13 +127,21 @@ def _print(target: tuple[int, int], tiles: Sequence[Sequence[TileWeight]]):
                 else:
                     str_to_print += '.'
                 continue
+            if outpost is not None and t.x == outpost[0] and t.y == outpost[1]:
+                str_to_print += '@'
+                continue
             if (t.forest is not None):
-                if is_in_range(target, t):
+                if is_in_range(existing_camp_1, t) or is_in_range(existing_camp_2, t):
+                    str_to_print += '#'
+                elif is_in_range(target, t):
                     str_to_print += 'O'
                 elif t.x >= 2097: # limit for claimable tiles
                     str_to_print += 'X'
                 else:
-                    str_to_print += '-'
+                    if outpost is not None and is_in_range(outpost, t, radius=30):
+                        str_to_print += '+'
+                    else:
+                        str_to_print += '-'
             else:
                 str_to_print += ' '
         print(str_to_print)
@@ -123,7 +166,8 @@ tiles_of_interest = to_matrix(filter(lambda t: min_x < t.x < max_x and min_y < t
 
 # _print(tiles_of_interest)
 
-targets = [(2104, 3135), (2105, 3135), (2107, 3135), (2109, 3135), (2109, 3131), (2105, 3131)]
+outpost = (2099, 3155)  # +2, +5
+targets = [(2090, 3150), (2093, 3152)]
 
 def count_forest_tiles(targets: Sequence[tuple[int, int]]) -> Sequence[tuple[tuple[int, int], int]]:
     results = []
@@ -131,15 +175,17 @@ def count_forest_tiles(targets: Sequence[tuple[int, int]]) -> Sequence[tuple[tup
         c = 0
         for t_row in tiles_of_interest:
             for t in t_row:
-                if is_in_range(target, t) and t.forest is not None:
+                if is_in_range(target, t) and t.forest is not None and not (is_in_range(existing_camp_1, t) or is_in_range(existing_camp_2, t)):
                     c += 1
         results.append((target, c))
     return results
 
+# Possible outposts
+# 2099, 3150
+# 2097, 3150
 print(count_forest_tiles(targets))
 
 # (2105, 3135) ok, but on the bottom limit for x for claiming territories. Maybe moving it to the "left" (i.e. lower y)
 
-_print((2105, 3135), tiles_of_interest)
-_print((2109, 3131), tiles_of_interest)
-_print((2105, 3131), tiles_of_interest)
+_print((2090, 3150), tiles_of_interest, outpost=outpost)
+_print((2093, 3152), tiles_of_interest, outpost=outpost)
